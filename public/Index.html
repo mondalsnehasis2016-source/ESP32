@@ -4,88 +4,88 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 body {
     margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     font-family: Arial, sans-serif;
     background: #0b0f14;
     color: #e5e7eb;
 }
 
 .dashboard {
-    width: 300px;
-    padding: 30px;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.card {
+    padding: 16px;
     border-radius: 16px;
-    background: rgba(20, 25, 32, 0.8);
+    background: rgba(20, 25, 32, 0.85);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+}
+
+h2 {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin: 0 0 10px 0;
+}
+
+.value-big {
+    font-size: 2.5rem;
     text-align: center;
 }
 
-h1 {
-    font-size: 1rem;
-    font-weight: 400;
-    opacity: 0.7;
-    margin-bottom: 10px;
-}
-
-.temp-main {
-    font-size: 3.5rem;
-    font-weight: 500;
-    color: #10a37f;
-}
-
 .units {
-    font-size: 0.9rem;
+    text-align: center;
+    font-size: 0.8rem;
     opacity: 0.6;
 }
 
 .status {
-    margin-top: 15px;
-    padding: 6px 12px;
+    margin-top: 10px;
+    padding: 5px 10px;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     display: inline-block;
 }
 
-.safe {
-    background: rgba(16,163,127,0.2);
-    color: #10a37f;
-}
-
-.normal {
-    background: rgba(234,179,8,0.15);
-    color: #eab308;
-}
-
-.danger {
-    background: rgba(239,68,68,0.15);
-    color: #ef4444;
-}
+.safe { background: rgba(16,163,127,0.2); color: #10a37f; }
+.normal { background: rgba(234,179,8,0.15); color: #eab308; }
+.danger { background: rgba(239,68,68,0.15); color: #ef4444; }
 
 .bar {
-    margin-top: 20px;
-    height: 6px;
-    width: 100%;
-    border-radius: 10px;
+    margin-top: 10px;
+    height: 5px;
     background: #1f2937;
+    border-radius: 10px;
     position: relative;
 }
 
 .indicator {
     position: absolute;
     top: -4px;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     background: #10a37f;
     border-radius: 50%;
-    box-shadow: 0 0 10px #10a37f;
-    transition: left 0.4s ease;
+    box-shadow: 0 0 8px #10a37f;
+}
+
+canvas {
+    width: 100% !important;
+    height: 150px !important;
+}
+
+@media(min-width:600px){
+    .dashboard {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 </style>
 </head>
@@ -93,63 +93,31 @@ h1 {
 <body>
 
 <div class="dashboard">
-    <h1>Temperature</h1>
 
-    <div class="temp-main" id="celsius">--°C</div>
-
-    <div class="units" id="otherUnits">-- K | -- °F</div>
-
-    <div class="status" id="status">--</div>
-
-    <div class="bar">
-        <div class="indicator" id="indicator"></div>
+    <div class="card">
+        <h2>Temperature</h2>
+        <div class="value-big" id="celsius">--°C</div>
+        <div class="units" id="otherUnits">-- K | -- °F</div>
+        <div class="status" id="status">--</div>
+        <div class="bar"><div class="indicator" id="indicator"></div></div>
     </div>
+
+    <div class="card">
+        <h2>Voltage</h2>
+        <div class="value-big" id="voltage">-- V</div>
+    </div>
+
+    <div class="card">
+        <h2>Vibration 1</h2>
+        <canvas id="chart1"></canvas>
+    </div>
+
+    <div class="card">
+        <h2>Vibration 2</h2>
+        <canvas id="chart2"></canvas>
+    </div>
+
 </div>
-
-<!-- <script>
-function classifyTemp(temp) {
-    if (temp < 20) return "safe";
-    if (temp < 40) return "normal";
-    return "danger";
-}
-
-function updateUI(temp) {
-    const kelvin = (temp + 273.15).toFixed(2);
-    const fahrenheit = ((temp * 9/5) + 32).toFixed(2);
-
-    document.getElementById("celsius").innerText = temp + "°C";
-    document.getElementById("otherUnits").innerText = `${kelvin} K | ${fahrenheit} °F`;
-
-    const status = classifyTemp(temp);
-    const statusEl = document.getElementById("status");
-
-    statusEl.className = "status " + status;
-
-    if (status === "safe") statusEl.innerText = "SAFE";
-    if (status === "normal") statusEl.innerText = "NORMAL";
-    if (status === "danger") statusEl.innerText = "DANGER";
-
-    const percent = Math.min(100, Math.max(0, temp * 2));
-    document.getElementById("indicator").style.left = percent + "%";
-
-    if (status === "danger") {
-        document.querySelector(".temp-main").style.color = "#ef4444";
-    } else if (status === "normal") {
-        document.querySelector(".temp-main").style.color = "#eab308";
-    } else {
-        document.querySelector(".temp-main").style.color = "#10a37f";
-    }
-}
-
-async function fetchTemp() {
-    const res = await fetch('/api/temp');
-    const data = await res.json();
-    updateUI(data.temperature);
-}
-
-setInterval(fetchTemp, 5000);
-fetchTemp();
-</script> -->
 
 <script>
 function classifyTemp(temp) {
@@ -158,7 +126,7 @@ function classifyTemp(temp) {
     return "danger";
 }
 
-function updateUI(temp) {
+function updateTempUI(temp) {
     const kelvin = (temp + 273.15).toFixed(2);
     const fahrenheit = ((temp * 9/5) + 32).toFixed(2);
 
@@ -169,36 +137,50 @@ function updateUI(temp) {
     const statusEl = document.getElementById("status");
 
     statusEl.className = "status " + status;
-
-    if (status === "safe") statusEl.innerText = "SAFE";
-    if (status === "normal") statusEl.innerText = "NORMAL";
-    if (status === "danger") statusEl.innerText = "DANGER";
+    statusEl.innerText = status.toUpperCase();
 
     const percent = Math.min(100, Math.max(0, temp * 2));
     document.getElementById("indicator").style.left = percent + "%";
-
-    if (status === "danger") {
-        document.querySelector(".temp-main").style.color = "#ef4444";
-    } else if (status === "normal") {
-        document.querySelector(".temp-main").style.color = "#eab308";
-    } else {
-        document.querySelector(".temp-main").style.color = "#10a37f";
-    }
 }
 
-// 🔥 SSE connection with auto-reconnect
+const chart1 = new Chart(document.getElementById('chart1'), {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [] }] },
+    options: { animation: false, scales: { x: { display: false } } }
+});
+
+const chart2 = new Chart(document.getElementById('chart2'), {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [] }] },
+    options: { animation: false, scales: { x: { display: false } } }
+});
+
+function updateChart(chart, value) {
+    if (chart.data.labels.length > 20) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
+    }
+    chart.data.labels.push('');
+    chart.data.datasets[0].data.push(value);
+    chart.update();
+}
+
 let eventSource;
 
 function connectSSE() {
     eventSource = new EventSource('/api/stream');
 
     eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        updateUI(data.temperature);
+        const d = JSON.parse(event.data);
+
+        updateTempUI(d.temperature);
+        document.getElementById("voltage").innerText = d.voltage + " V";
+
+        updateChart(chart1, d.ax1);
+        updateChart(chart2, d.ax2);
     };
 
     eventSource.onerror = function() {
-        console.log("SSE disconnected. Reconnecting...");
         eventSource.close();
         setTimeout(connectSSE, 3000);
     };
