@@ -9,6 +9,8 @@ app.use(express.static('public'));
 let temperature = 0;
 let clients = [];
 
+let sneha = 0;
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/Index.html');
 });
