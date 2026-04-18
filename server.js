@@ -10,7 +10,7 @@ let temperature = 0;
 let clients = [];
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(__dirname + '/public/Index.html');
 });
 
 app.get('/api/temp', (req, res) => {
