@@ -41,6 +41,14 @@ h2 {
     text-align: center;
 }
 
+.xyz-values {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
 .units {
     text-align: center;
     font-size: 0.8rem;
@@ -109,11 +117,21 @@ canvas {
 
     <div class="card">
         <h2>Vibration Sensor 1 (X Y Z)</h2>
+        <div class="xyz-values">
+            <span id="ax1">X: --</span>
+            <span id="ay1">Y: --</span>
+            <span id="az1">Z: --</span>
+        </div>
         <canvas id="chart1"></canvas>
     </div>
 
     <div class="card">
         <h2>Vibration Sensor 2 (X Y Z)</h2>
+        <div class="xyz-values">
+            <span id="ax2">X: --</span>
+            <span id="ay2">Y: --</span>
+            <span id="az2">Z: --</span>
+        </div>
         <canvas id="chart2"></canvas>
     </div>
 
@@ -195,6 +213,14 @@ function connectSSE() {
 
         updateTempUI(d.temperature);
         document.getElementById("voltage").innerText = d.voltage + " V";
+
+        document.getElementById("ax1").innerText = "X: " + d.ax1;
+        document.getElementById("ay1").innerText = "Y: " + d.ay1;
+        document.getElementById("az1").innerText = "Z: " + d.az1;
+
+        document.getElementById("ax2").innerText = "X: " + d.ax2;
+        document.getElementById("ay2").innerText = "Y: " + d.ay2;
+        document.getElementById("az2").innerText = "Z: " + d.az2;
 
         updateXYZ(chart1, d.ax1, d.ay1, d.az1);
         updateXYZ(chart2, d.ax2, d.ay2, d.az2);
