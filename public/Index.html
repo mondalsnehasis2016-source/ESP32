@@ -79,7 +79,7 @@ h2 {
 
 canvas {
     width: 100% !important;
-    height: 150px !important;
+    height: 160px !important;
 }
 
 @media(min-width:600px){
@@ -108,12 +108,12 @@ canvas {
     </div>
 
     <div class="card">
-        <h2>Vibration 1</h2>
+        <h2>Vibration Sensor 1 (X Y Z)</h2>
         <canvas id="chart1"></canvas>
     </div>
 
     <div class="card">
-        <h2>Vibration 2</h2>
+        <h2>Vibration Sensor 2 (X Y Z)</h2>
         <canvas id="chart2"></canvas>
     </div>
 
@@ -143,25 +143,43 @@ function updateTempUI(temp) {
     document.getElementById("indicator").style.left = percent + "%";
 }
 
-const chart1 = new Chart(document.getElementById('chart1'), {
-    type: 'line',
-    data: { labels: [], datasets: [{ data: [] }] },
-    options: { animation: false, scales: { x: { display: false } } }
-});
+function createXYZChart(ctx) {
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: 'X', data: [], tension: 0.4, borderWidth: 2, pointRadius: 0, fill: false },
+                { label: 'Y', data: [], tension: 0.4, borderWidth: 2, pointRadius: 0, fill: false },
+                { label: 'Z', data: [], tension: 0.4, borderWidth: 2, pointRadius: 0, fill: false }
+            ]
+        },
+        options: {
+            responsive: true,
+            animation: false,
+            plugins: { legend: { display: true } },
+            scales: {
+                x: { display: false },
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
 
-const chart2 = new Chart(document.getElementById('chart2'), {
-    type: 'line',
-    data: { labels: [], datasets: [{ data: [] }] },
-    options: { animation: false, scales: { x: { display: false } } }
-});
+const chart1 = createXYZChart(document.getElementById('chart1'));
+const chart2 = createXYZChart(document.getElementById('chart2'));
 
-function updateChart(chart, value) {
-    if (chart.data.labels.length > 20) {
+function updateXYZ(chart, x, y, z) {
+    if (chart.data.labels.length > 30) {
         chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
+        chart.data.datasets.forEach(ds => ds.data.shift());
     }
+
     chart.data.labels.push('');
-    chart.data.datasets[0].data.push(value);
+    chart.data.datasets[0].data.push(x);
+    chart.data.datasets[1].data.push(y);
+    chart.data.datasets[2].data.push(z);
+
     chart.update();
 }
 
@@ -173,11 +191,13 @@ function connectSSE() {
     eventSource.onmessage = function(event) {
         const d = JSON.parse(event.data);
 
+        console.log("Incoming Data:", d);
+
         updateTempUI(d.temperature);
         document.getElementById("voltage").innerText = d.voltage + " V";
 
-        updateChart(chart1, d.ax1);
-        updateChart(chart2, d.ax2);
+        updateXYZ(chart1, d.ax1, d.ay1, d.az1);
+        updateXYZ(chart2, d.ax2, d.ay2, d.az2);
     };
 
     eventSource.onerror = function() {
