@@ -36,8 +36,8 @@ app.get('/api/stream', (req, res) => {
     });
 });
 
-app.post('/api/set-temp', (req, res) => {
-    temperature = Number(req.body.temperature) || 0;
+app.get('/api/change', (req, res) => {
+    temperature = Number(req.query.temperature) || 0;
     sendTemperatureUpdate();
     res.json({ temperature });
 });
@@ -45,7 +45,7 @@ app.post('/api/set-temp', (req, res) => {
 function sendTemperatureUpdate() {
     clients.forEach(client => {
         client.res.write(`data: ${JSON.stringify({ temperature })}\n\n`);
-    });
+    });	
 }
 
 setInterval(() => {
